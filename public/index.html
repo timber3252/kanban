@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/css/style.css">
+    <link rel="stylesheet" href="components/css/datetimepicker.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datetimepicker@0.1.39/dist/DateTimePicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datetimepicker@0.1.39/dist/i18n/DatetimePicker-i18n-zh-CN.js"></script>
+    <title>Dashboard - Kanban</title>
+    <script src="../components/js/login_status.js"></script>
+    <script>
+      let uid = getCookie("KANBAN_USERID");
+      if (uid == "") {
+        location.replace('/login/');
+      } else {
+        var ws = new WebSocket("ws://localhost:26868");
+        ws.onopen = function (e) {
+          console.log('connected to ws server');
+          ws.send('QueryUser#' + uid);
+        }
+        ws.onerror = function (e) {
+          console.error('fatal error:', e);
+        }
+        ws.onmessage = function (e) {
+          let arr = e.data.split('#');
+          let key = arr[0];
+          if (key == "QueryUser") {
+            let value = arr[1];
+            if (value == "true") {
+              let cur = document.querySelector('.container');
+              cur.toggleAttribute('hidden');
+              ws.send('UpdateLists#' + uid);
+            } else {
+              setCookie('KANBAN_USERID', '', -1);
+              location.replace('/login/');
+            }
+          } else if (key == "UpdateList") {
+            let list = arr[1];
+            let target = document.querySelector(list);
+            target.innerHTML = unescape(arr[2]);
+            $(".card").hover(function () {
+              $("#" + $(this).attr("id") + " .tcheckbox").show();
+            }, function () {
+              $("#" + $(this).attr("id") + " .tcheckbox").hide();
+            });
+            $(".tcheckbox-body").change(function () {
+              if ($(this).is(":checked") == true) {
+                if ($(this).parents('.mainpanel').hasClass('finish-panel')) {
+                  ws.send('DelTask#' + $(this).parents('.card').attr("id"));
+                  ws.send('UpdateLists#' + uid);
+                } else {
+                  ws.send('MoveTask#' + $(this).parents('.card').attr("id") + '#finish');
+                  ws.send('UpdateLists#' + uid);
+                }
+              }
+            });
+          }
+        }
+      }
+      
+      $(document).ready(function() {
+        var picker = $("#dtBox").DateTimePicker({
+          language: 'zh-CN'
+        });
+      });
+
+      function hideBoxNewTask() {
+        $(".box-newtask").hide();
+      }
+      function showBoxNewTask(value) {
+        if (value != undefined) {
+          $("#edt_task_group").val(value);
+        }
+        $(".box-newtask").show();
+      }
+      function newTask() {
+        let task_name = escape($("#edt_task_name").val());
+        let task_time = $("#edt_task_time").val();
+        let task_desc = escape($("#edt_task_desc").val());
+        let task_group = $("#edt_task_group").val();
+        let mark = document.querySelector('#tcheckbox-mark').checked;
+        if (task_name == "") {
+          alert("请输入事项名称！");
+          return;
+        }
+        if (task_group != "context" && task_group != "project" && task_group != "maybe" && task_group != "finish") {
+          alert("所在清单错误！");
+        }
+        ws.send('NewTask#' + uid + '#' + task_group + '#' + task_name + "#" + task_time + "#" + task_desc + "#" + mark);
+        ws.send('UpdateLists#' + uid);
+        hideBoxNewTask();
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container" hidden>
+      <div class="header lineflex">
+        <div class="left-item lineflex">
+          <a class="iconbox iconbutton">
+            <svg fill="#ffffff" width="24" height="24" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><path d="M 200 713C 200 713 800 713 800 713C 814 712 826 719 833 731C 840 743 840 757 833 769C 826 781 814 788 800 788C 800 788 200 788 200 788C 186 788 174 781 167 769C 160 757 160 743 167 731C 174 719 186 712 200 713C 200 713 200 713 200 713M 200 462C 200 462 800 462 800 462C 814 462 826 469 833 481C 840 493 840 507 833 519C 826 531 814 538 800 538C 800 538 200 538 200 538C 186 538 174 531 167 519C 160 507 160 493 167 481C 174 469 186 462 200 462C 200 462 200 462 200 462M 200 213C 200 213 800 213 800 213C 814 212 826 219 833 231C 840 243 840 257 833 269C 826 281 814 288 800 287C 800 287 200 287 200 287C 186 288 174 281 167 269C 160 257 160 243 167 231C 174 219 186 212 200 213C 200 213 200 213 200 213"/></svg>
+          </a>
+          <div class="main-title">
+            <span>Kanban</span>
+          </div>
+          <div class="searchbar">
+            <a class="searchbtn" hidden><svg fill="#ffffff" width="24" height="24" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><path d="M 837 400C 837 531 731 638 600 638C 548 638 500 621 461 592C 461 592 252 802 252 802C 252 802 198 748 198 748C 198 748 408 539 408 539C 379 500 362 452 362 400C 362 269 469 163 600 163C 731 163 837 269 837 400C 837 400 837 400 837 400M 437 400C 437 490 510 563 600 563C 690 563 763 490 763 400C 763 310 690 238 600 238C 510 238 437 310 437 400C 437 400 437 400 437 400" transform="translate(1000,0) scale(-1,1)"/></svg></a>
+            <input class="searchtxt" hidden type="text" style="text-align: left;" value="暂未实现" readonly>
+          </div>
+        </div>
+        <div class="right-item">
+          <a class="iconbox iconbutton button_newtask" onclick="showBoxNewTask()">
+            <svg fill="#ffffff" width="24" height="24" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><path d="M 538 150C 538 150 538 462 538 462C 538 462 850 462 850 462C 850 462 850 538 850 538C 850 538 538 538 538 538C 538 538 538 850 538 850C 538 850 462 850 462 850C 462 850 462 538 462 538C 462 538 150 538 150 538C 150 538 150 462 150 462C 150 462 462 462 462 462C 462 462 462 150 462 150C 462 150 538 150 538 150"/></svg>
+          </a>
+          <a class="iconbox iconbutton button_settings">
+            <svg fill="#ffffff" width="24" height="24" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><path d="M 500 342C 413 342 342 413 342 500C 342 587 413 658 500 658C 587 658 658 587 658 500C 658 413 587 342 500 342C 500 342 500 342 500 342M 500 276C 501 276 502 276 502 276C 624 277 724 378 724 500C 724 623 623 724 500 724C 377 724 276 623 276 500C 276 377 377 276 500 276C 500 276 500 276 500 276M 459 91C 449 91 440 99 438 110C 438 110 438 110 438 110C 438 110 428 172 428 172C 425 185 417 195 404 199C 387 204 368 212 350 221C 339 227 325 226 315 218C 315 218 266 183 266 183C 256 177 243 179 237 185C 237 185 182 240 182 240C 182 240 182 240 182 240C 174 248 173 258 179 266C 179 266 180 267 180 267C 180 267 217 319 217 319C 224 329 225 343 219 354C 210 371 202 389 197 408C 193 420 183 429 171 431C 171 431 110 442 110 442C 110 442 110 442 110 442C 99 443 91 453 91 463C 91 463 91 541 91 541C 91 551 99 560 110 562C 110 562 110 562 110 562C 110 562 172 572 172 572C 185 575 195 584 199 596C 204 614 212 632 221 650C 227 661 226 675 218 685C 218 685 183 734 183 734C 176 744 177 755 184 762C 185 763 185 763 185 763C 185 763 239 817 239 817C 250 826 260 826 266 821C 267 821 267 820 267 820C 267 820 319 783 319 783C 329 776 343 775 354 781C 370 790 388 797 406 802C 418 806 427 816 429 828C 429 828 440 890 440 890C 440 890 440 890 440 890C 442 901 451 909 461 909C 461 909 539 909 539 909C 549 909 558 901 560 890C 560 890 560 890 560 890C 560 890 571 828 571 828C 573 816 582 806 594 802C 612 797 631 789 648 780C 659 774 672 775 683 782C 683 782 733 818 733 818C 742 824 756 822 762 816C 762 816 817 761 817 761C 824 754 825 742 819 735C 819 734 819 734 818 734C 818 734 782 683 782 683C 775 673 774 660 780 649C 789 630 797 612 802 594C 806 582 816 573 828 571C 828 571 890 560 890 560C 890 560 890 560 890 560C 901 558 909 549 909 539C 909 539 909 461 909 461C 909 450 902 442 891 440C 891 440 891 440 891 440C 891 440 829 429 829 429C 817 427 808 419 804 407C 797 388 789 369 780 352C 774 341 775 327 782 317C 782 317 819 266 819 266C 825 258 825 246 817 239C 817 239 817 239 817 239C 817 239 763 185 763 185C 752 176 742 176 734 182C 734 182 734 182 734 182C 734 182 683 218 683 218C 672 225 659 226 648 220C 630 210 611 202 592 197C 580 193 571 183 569 171C 569 171 558 110 558 110C 558 110 558 110 558 110C 557 99 547 91 537 91C 537 91 459 91 459 91M 459 25C 459 25 537 25 537 25C 580 25 617 56 624 99C 624 99 631 140 631 140C 641 143 651 148 661 152C 661 152 696 127 696 127C 730 103 776 108 807 134C 807 135 808 136 809 137C 809 137 864 192 864 192C 864 192 863 191 863 191C 895 222 898 270 873 304C 873 305 873 305 873 305C 873 305 848 340 848 340C 852 349 856 358 859 367C 859 367 902 375 902 375C 945 382 975 419 975 461C 975 461 975 539 975 539C 975 582 944 618 901 625C 901 625 859 633 859 633C 855 642 852 651 848 660C 848 660 873 696 873 696C 873 696 872 695 872 695C 898 730 894 778 864 808C 864 808 808 864 808 864C 808 864 808 864 807 864C 778 892 732 897 696 873C 696 873 696 873 696 873C 696 873 661 848 661 848C 651 852 642 856 633 859C 633 859 625 901 625 901C 618 944 582 975 539 975C 539 975 461 975 461 975C 418 975 382 944 375 901C 375 901 367 859 367 859C 359 856 350 852 342 849C 342 849 305 874 305 874C 305 874 306 874 306 874C 272 899 226 893 195 866C 194 866 193 865 193 865C 193 865 138 810 138 810C 138 810 139 810 139 810C 107 780 104 732 128 697C 128 697 128 697 128 696C 128 696 153 662 153 662C 149 653 145 644 142 635C 142 635 99 627 99 627C 56 620 25 583 25 541C 25 541 25 463 25 463C 25 420 56 383 99 376C 99 376 140 369 140 369C 143 360 147 351 151 341C 151 341 126 305 126 305C 126 305 126 306 126 306C 100 271 105 222 136 192C 136 192 135 193 135 193C 135 193 190 138 190 138C 220 109 266 104 303 128C 303 128 303 128 304 128C 304 128 338 153 338 153C 347 149 356 145 365 142C 365 142 373 99 373 99C 380 58 415 27 456 25C 457 25 458 25 459 25C 459 25 459 25 459 25"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="board">
+        <div class="panels">
+          <div class="panel">
+            <div class="panel-top">
+              执行清单
+            </div>
+            <div class="context-panel mainpanel">
+            </div>
+            <div class="add-card newtask-context" onclick="showBoxNewTask('context')">
+              + 添加新事项
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-top">
+              项目清单
+            </div>
+            <div class="project-panel mainpanel">
+            </div>
+            <div class="add-card newtask-project" onclick="showBoxNewTask('project')">
+              + 添加新事项
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-top">
+              可能清单
+            </div>
+            <div class="maybe-panel mainpanel">
+            </div>
+            <div class="add-card newtask-maybe" onclick="showBoxNewTask('maybe')">
+              + 添加新事项
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-top">
+              完成清单
+            </div>
+            <div class="finish-panel mainpanel">
+            </div>
+            <div class="add-card newtask-finish" hidden>
+              + 添加新事项
+            </div>
+          </div>
+        </div>
+        <div class="box box-newtask" hidden>
+          <div class="title-box">添加新任务</div>
+          <div class="text-area default">
+            <table>
+              <tr><td class="left-padding-text">事项名称：</td><td><input type="text" id="edt_task_name" class="text" placeholder="简单描述事项名称"></td></tr>
+              <tr><td class="left-padding-text">截止时间：</td><td><input type="text" id="edt_task_time" class="text" data-field="datetime" readonly><div id="dtBox"></div></td></tr>
+              <tr><td class="left-padding-text">事项描述：</td><td><input type="text" id="edt_task_desc" class="text" placeholder="事项备注"></td></tr>
+              <tr><td class="left-padding-text">所在清单：</td><td><select class="text1" id="edt_task_group"><option value="context">执行清单</option><option value="project">项目清单</option><option value="maybe">可能清单</option></select></td></tr>
+            </table>
+            <div style="margin-top: 10px;" class="lineflex">
+              <div>
+                <span style="padding-left: 16px;">颜色标记：</span><label class="tcheckbox"><input type="checkbox" id="tcheckbox-mark"><span style="float:none; display: inline-block;"></span></label>
+              </div>
+              <div>
+                <input type="button" class="inputbutton" value="取消创建" onclick="hideBoxNewTask()">
+                <input type="button" class="inputbutton" value="创建事项" onclick="newTask()">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="box box-edittask" hidden>
+
+        </div>
+        <div class="box quit"
+      </div>
+    </div>
+  </body>
+</html>

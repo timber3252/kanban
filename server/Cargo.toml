@@ -1,0 +1,15 @@
+[package]
+name = "server"
+version = "0.1.0"
+authors = ["Richard Acosta <timber3252@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tungstenite = "0.11.1"
+postgres = { version = "0.17.5", features = ["with-chrono-0_4"] }
+hmac = "0.9.0"
+sha2 = "0.9.1"
+digest = "0.9.0"
+chrono = "0.4.18"

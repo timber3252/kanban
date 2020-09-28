@@ -1,0 +1,87 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
+body {
+  background-image: url('https://cdn.jsdelivr.net/gh/volantis-x/cdn-wallpaper-minimalist/2020/052.jpg');
+  background-position: center;
+  height: 100%;
+  width: 100%;
+}
+html {
+  font-family: UbuntuMono,"PingFang SC","Microsoft YaHei",Helvetica,Arial,Menlo,Monaco,monospace,sans-serif;
+}
+.base {
+  text-align: center;
+  vertical-align: center;
+  height: 100%;
+  width: 100%;
+}
+.login-box {
+  margin-top: -200px;
+  margin-left: -200px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #FFFFFF;
+  box-shadow: 0px 20px 60px rgba(0, 0, 0, 0.4),
+    0px 0px 150px rgba(0,0,0,0.4);
+}
+.title-box {
+  color: white;
+  position: relative;
+  text-align: center;
+  line-height: 32px;
+  width: 400px;
+  height: 32px;
+  background-color: #0488EE;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 32px;
+}
+.login-area {
+  margin: 15px;
+}
+.text {
+  outline: none;
+  font-size: 18px;
+  width: 300px;
+  margin: 10px;
+  padding: 16px 16px;
+  border-radius: 6px;
+  border: 1px #8792A1 solid;
+  box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.1);
+}
+.inputbutton {
+  width: 332px;
+  margin: 10px;
+  padding: 16px 0px;
+  background-color: #0599FF;
+  border-radius: 6px;
+  border: 1px #5588BB solid;
+  outline: none;
+  font-size: 18px;
+  color: #FFFFFF;
+  box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.1);
+}
+.inputbutton:hover {
+  background-color: #0377DD;
+}
+.inputbutton:active {
+  background-color: #0268CE;
+}
+.right-aligned {
+  width: 332px;
+  text-align: right;
+}
+.textbutton {
+  color: #5588BB;
+  text-decoration: none;
+}
+.textbutton:hover, .textbutton:active {
+  cursor: pointer;
+}
