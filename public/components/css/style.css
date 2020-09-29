@@ -165,6 +165,22 @@ html {
   border: 1px solid #F8F8F8;
 }
 
+.card.default:hover {
+  background-color: #F8F8F8;
+}
+
+.card.mark:hover {
+  background-color: #0377DD;
+}
+
+.card.default:active {
+  background-color: #F0F0F0;
+}
+
+.card.mark:active {
+  background-color: #0268CE;
+}
+
 .board .add-card {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -312,7 +328,30 @@ html {
   height: 500px;
 }
 
+.box-edittask {
+  margin-top: -200px;
+  margin-left: -300px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 500px;
+}
+
 .box-newtask .title-box {
+  position: relative;
+  text-align: center;
+  line-height: 48px;
+  color: white;
+  width: 600px;
+  height: 48px;
+  background-color: #0488EE;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 32px;
+}
+
+.box-edittask .title-box {
   position: relative;
   text-align: center;
   line-height: 48px;
@@ -360,6 +399,31 @@ html {
   padding-left: 15px;
 }
 
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 48px;
+  left: 0px;
+  width: 100px;
+  background-color: white;
+  color: black;
+  box-shadow: 0px 8px 16px 3px rgba(0, 0, 0, 0.1);
+}
+
+.normalbutton:hover {
+  background-color: #F8F8F8;
+  cursor: pointer;
+}
+
+.normalbutton:active {
+  background-color: #F0F0F0;
+  cursor: pointer;
+}
+
+.dropdown:hover .dropdown-content {
+  display: list-item;
+}
+
 .inputbutton {
   width: 90px;
   margin: 10px;
@@ -377,4 +441,15 @@ html {
 }
 .inputbutton:active {
   background-color: #0268CE;
+}
+.nonebutton {
+  outline: none;
+  border: none;
+  background-color: #FFFFFF;
+}
+.nonebutton:hover, .nonebutton:active {
+  outline: none;
+  border: none;
+  background-color: #FFFFFF;
+  cursor: pointer;
 }

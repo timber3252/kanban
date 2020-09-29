@@ -1,0 +1,10 @@
+{
+  "name": "kanban",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "express": "^4.17.1",
+    "vhost": "^3.0.2",
+    "ws": "^7.3.1"
+  }
+}

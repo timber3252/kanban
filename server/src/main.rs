@@ -205,6 +205,14 @@ fn add_task(task: &Task, client: &mut Client) {
     ", &[&task.userid, &task.task_name, &deadline, &task.task_desc, &task.task_group, &task.mark]) {
       println!("{}", e);
     }
+  } else {
+    let deadline = NaiveDateTime::parse_from_str("1980-01-01 00:00", "%Y-%m-%d %H:%M").unwrap();
+    if let Err(e) = client.execute("
+      INSERT INTO tasks (userid, task_name, task_ddl, task_desc, task_group, mark)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    ", &[&task.userid, &task.task_name, &deadline, &task.task_desc, &task.task_group, &task.mark]) {
+      println!("{}", e);
+    }
   }
 }
 
@@ -221,7 +229,8 @@ fn query_tasks(uid: &str, gid: &str, client: &mut Client) -> String {
       task_name: row.get(2),
       task_ddl: {
         let timestamp = row.get::<usize, NaiveDateTime>(3);
-        timestamp.format("%Y-%m-%d %H:%M").to_string()
+        let ss = timestamp.format("%Y-%m-%d %H:%M").to_string();
+        if ss == "1980-01-01 00:00" { String::new() } else { ss }
       },
       task_desc: row.get(4),
       task_group: row.get(5),
